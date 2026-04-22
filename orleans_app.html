@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orleans Sports Club</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --green:#1a3a2a;--green2:#2d6a4a;--green3:#4caf7d;
+  --bg:#f5f5f0;--surface:#ffffff;--surface2:#f0efea;
+  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.15);
+  --text:#1a1a1a;--text2:#555;--text3:#888;
+  --red:#c0392b;--blue:#1565c0;--amber:#b45309;
+  --seed-black:#1c1c1e;--seed-red:#d32f2f;--seed-blue:#1565c0;--seed-green:#2e7d32;
+}
+html,body{height:100%;background:#e8e8e0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;display:flex;justify-content:center;align-items:flex-start;padding:20px 0;min-height:100vh;}
+.device{width:390px;min-height:844px;background:var(--bg);border-radius:44px;overflow:hidden;border:10px solid #1a1a1a;position:relative;box-shadow:0 30px 80px rgba(0,0,0,0.35);}
+.notch{width:120px;height:30px;background:#1a1a1a;border-radius:0 0 18px 18px;margin:0 auto;position:relative;z-index:100;}
+.status{background:#1a1a1a;padding:0 24px 6px;display:flex;justify-content:space-between;align-items:center;}
+.status span{color:white;font-size:12px;font-weight:500;}
+.scroll{height:calc(100% - 40px);overflow-y:auto;overflow-x:hidden;}
+.scroll::-webkit-scrollbar{display:none;}
+
+/* Screens */
+.screen{display:none;min-height:100%;}
+.screen.active{display:block;}
+
+/* Header */
+.hdr{background:var(--green);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.hdr-l{display:flex;align-items:center;gap:10px;}
+.hdr-back{background:none;border:none;color:rgba(255,255,255,0.8);font-size:22px;cursor:pointer;padding:0 4px 0 0;line-height:1;}
+.hdr-title{font-size:17px;font-weight:600;color:white;}
+.hdr-sub{font-size:11px;color:rgba(255,255,255,0.65);margin-top:1px;}
+.hdr-r{display:flex;align-items:center;gap:8px;}
+.notif-btn{background:rgba(255,255,255,0.15);border:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;position:relative;}
+.notif-dot{position:absolute;top:5px;right:5px;width:8px;height:8px;background:#ef4444;border-radius:50%;border:1.5px solid var(--green);}
+.av-sm{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:white;cursor:pointer;}
+
+/* Nav */
+.nav{display:flex;background:var(--surface);border-top:0.5px solid var(--border2);position:sticky;bottom:0;z-index:50;}
+.nb{flex:1;padding:8px 2px 10px;border:none;background:transparent;font-size:9px;font-weight:500;color:var(--text3);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:color .15s;}
+.nb.on{color:var(--green);}
+.ni{font-size:18px;line-height:1;}
+.nb.on .ni-bar{display:block;}
+.ni-bar{display:none;width:20px;height:2px;background:var(--green);border-radius:2px;margin-top:1px;}
+
+/* Cards */
+.card{background:var(--surface);border-radius:14px;border:0.5px solid var(--border);margin:0 14px 10px;padding:14px;}
+.sec{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.6px;text-transform:uppercase;padding:14px 18px 7px;}
+.badge{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500;white-space:nowrap;display:inline-block;}
+.badge-green{background:#dcfce7;color:#166534;}
+.badge-amber{background:#fef3c7;color:#92400e;}
+.badge-red{background:#fee2e2;color:#991b1b;}
+.badge-blue{background:#dbeafe;color:#1e40af;}
+.badge-gray{background:var(--surface2);color:var(--text2);}
+.divider{height:0.5px;background:var(--border);margin:10px 0;}
+.btn-main{width:100%;padding:12px;background:var(--green);color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .15s;}
+.btn-main:hover{opacity:.9;}
+.btn-out{padding:10px 16px;background:transparent;border:0.5px solid var(--border2);border-radius:10px;font-size:13px;color:var(--text2);cursor:pointer;}
+
+/* ── LOGIN ── */
+#s-login{background:var(--green);min-height:100%;}
+.login-inner{padding:40px 24px 30px;}
+.logo-wrap{text-align:center;margin-bottom:32px;}
+.logo-circle{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:32px;}
+.login-title{font-size:22px;font-weight:700;color:white;}
+.login-sub{font-size:13px;color:rgba(255,255,255,0.65);margin-top:4px;}
+.field-lbl{font-size:13px;color:rgba(255,255,255,0.7);display:block;margin-bottom:5px;}
+.field-input{width:100%;padding:12px 14px;background:rgba(255,255,255,0.12);border:0.5px solid rgba(255,255,255,0.25);border-radius:10px;font-size:14px;color:white;outline:none;}
+.field-input::placeholder{color:rgba(255,255,255,0.4);}
+.field-input:focus{border-color:rgba(255,255,255,0.5);background:rgba(255,255,255,0.16);}
+.login-btn{width:100%;padding:13px;background:white;color:var(--green);border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;}
+.demo-box{background:rgba(255,255,255,0.1);border-radius:12px;padding:14px;margin-top:20px;}
+.demo-lbl{font-size:11px;font-weight:600;color:rgba(255,255,255,0.5);letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px;}
+.demo-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid rgba(255,255,255,0.1);cursor:pointer;}
+.demo-row:last-child{border-bottom:none;}
+.demo-txt{font-size:12px;color:rgba(255,255,255,0.85);}
+.err-msg{font-size:12px;color:#fca5a5;background:rgba(239,68,68,0.2);border-radius:6px;padding:8px 10px;margin-top:8px;display:none;}
+
+/* ── HOME ── */
+.hero{background:var(--green);padding:18px;margin:14px;border-radius:16px;color:white;}
+.hero-name{font-size:18px;font-weight:600;}
+.hero-sub{font-size:12px;opacity:.7;margin-top:2px;}
+.hero-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:14px;}
+.hstat{background:rgba(255,255,255,0.1);border-radius:10px;padding:10px 8px;text-align:center;}
+.hstat-n{font-size:22px;font-weight:700;}
+.hstat-l{font-size:10px;opacity:.65;margin-top:2px;}
+.news-card{background:var(--surface);border-radius:14px;border:0.5px solid var(--border);margin:0 14px 10px;overflow:hidden;}
+.news-img{height:88px;background:var(--green2);display:flex;align-items:center;justify-content:center;font-size:36px;}
+.news-body{padding:12px 14px;}
+
+/* ── COURTS ── */
+.date-scroll{display:flex;gap:8px;padding:12px 14px;overflow-x:auto;}
+.date-scroll::-webkit-scrollbar{display:none;}
+.date-chip{padding:7px 16px;border-radius:20px;border:0.5px solid var(--border2);background:var(--surface);font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.date-chip.on{background:var(--green);color:white;border-color:var(--green);}
+.court-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:0 14px 10px;}
+.court-card{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:12px;}
+.court-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;}
+.slot{font-size:11px;padding:5px 8px;border-radius:6px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
+.slot-free{background:#dcfce7;color:#166534;}
+.slot-mine{background:#dbeafe;color:#1e40af;}
+.slot-taken{background:var(--surface2);color:var(--text3);cursor:default;}
+.slot-closed{background:#fee2e2;color:#991b1b;cursor:default;}
+
+/* ── TOURNAMENT ── */
+.bracket-match{background:var(--surface);border:0.5px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden;}
+.bm-row{padding:9px 12px;display:flex;justify-content:space-between;align-items:center;font-size:13px;}
+.bm-win{background:#dcfce7;color:#166534;font-weight:600;}
+.bm-lose{color:var(--text3);}
+.bm-div{height:0.5px;background:var(--border);}
+
+/* ── MEMBERS ── */
+.mem-row{background:var(--surface);border-bottom:0.5px solid var(--border);padding:11px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;}
+.av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:white;flex-shrink:0;position:relative;}
+.av-ring{position:absolute;inset:-3px;border-radius:50%;border:3px solid transparent;}
+.seed-chip{font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;}
+.seed-dot{width:7px;height:7px;border-radius:50%;}
+.leg-bar{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;background:var(--surface);border-bottom:0.5px solid var(--border);}
+.leg-chip{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);cursor:pointer;padding:3px 9px;border-radius:20px;border:0.5px solid var(--border);}
+.leg-chip.on{background:var(--surface2);border-color:var(--border2);color:var(--text);}
+.leg-dot{width:8px;height:8px;border-radius:50%;}
+
+/* ── POLLS ── */
+.poll-card{background:var(--surface);border:0.5px solid var(--border);border-radius:14px;margin:0 14px 12px;padding:16px;}
+.poll-q{font-size:15px;font-weight:600;color:var(--text);margin-bottom:14px;}
+.poll-opt{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.poll-bar-wrap{flex:1;background:var(--surface2);border-radius:20px;height:28px;overflow:hidden;position:relative;}
+.poll-bar{height:100%;border-radius:20px;background:var(--green);transition:width .4s;}
+.poll-bar-label{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;color:white;font-weight:500;white-space:nowrap;}
+.poll-pct{font-size:12px;font-weight:600;min-width:32px;text-align:right;color:var(--text3);}
+
+/* ── ADMIN ── */
+.admin-stat-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:0 14px 4px;}
+.admin-stat{background:var(--surface);border-radius:12px;border:0.5px solid var(--border);padding:14px;text-align:center;}
+.admin-stat-n{font-size:26px;font-weight:700;color:var(--green);}
+.admin-stat-l{font-size:12px;color:var(--text3);margin-top:3px;}
+.admin-row{background:var(--surface);border-bottom:0.5px solid var(--border);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.admin-row:hover{background:var(--surface2);}
+
+/* ── NOTIFICATIONS ── */
+.notif-item{background:var(--surface);border-bottom:0.5px solid var(--border);padding:13px 16px;display:flex;gap:12px;align-items:flex-start;}
+.notif-icon{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.notif-unread{background:var(--surface2);}
+
+/* ── MATCH SCHEDULING ── */
+.match-opp-card{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px;margin-bottom:8px;cursor:pointer;}
+.match-opp-card.selected{border:2px solid var(--green);background:#f0fdf4;}
+.time-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.time-chip{padding:9px 6px;border-radius:8px;background:var(--surface2);border:0.5px solid var(--border);font-size:12px;font-weight:500;color:var(--text2);text-align:center;cursor:pointer;}
+.time-chip.on{background:var(--green);color:white;border-color:var(--green);}
+
+/* ── SHOP ── */
+.shop-item{background:var(--surface);border:0.5px solid var(--border);border-radius:14px;margin:0 14px 10px;overflow:hidden;}
+.shop-img{height:100px;display:flex;align-items:center;justify-content:center;font-size:48px;}
+.shop-body{padding:12px 14px;}
+.shop-price{font-size:17px;font-weight:700;color:var(--green);}
+.shop-cart-btn{background:var(--green);color:white;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;}
+
+/* ── STATS / LEADERBOARD ── */
+.lb-row{background:var(--surface);border-bottom:0.5px solid var(--border);padding:11px 14px;display:flex;align-items:center;gap:12px;}
+.lb-rank{font-size:16px;font-weight:700;color:var(--text3);min-width:28px;text-align:center;}
+.lb-rank.top{color:var(--green);}
+.chart-bar-wrap{margin:0 14px 14px;}
+.chart-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.chart-bar-lbl{font-size:12px;color:var(--text2);min-width:60px;}
+.chart-bar-bg{flex:1;background:var(--surface2);border-radius:20px;height:20px;overflow:hidden;}
+.chart-bar-fill{height:100%;border-radius:20px;background:var(--green);}
+.chart-bar-val{font-size:12px;font-weight:600;color:var(--text2);min-width:28px;text-align:right;}
+
+/* ── CALENDAR ── */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:0 14px 10px;}
+.cal-day-hdr{text-align:center;font-size:11px;font-weight:600;color:var(--text3);padding:4px 0;}
+.cal-day{text-align:center;padding:7px 2px;border-radius:8px;font-size:13px;color:var(--text);cursor:pointer;position:relative;}
+.cal-day.other-month{color:var(--text3);}
+.cal-day.today{background:var(--green);color:white;font-weight:600;}
+.cal-day.has-event::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--green);}
+.cal-day.today.has-event::after{background:white;}
+.event-item{background:var(--surface);border-left:3px solid var(--green);padding:10px 14px;margin:0 14px 8px;border-radius:0 8px 8px 0;border-top:0.5px solid var(--border);border-right:0.5px solid var(--border);border-bottom:0.5px solid var(--border);}
+
+/* ── PROFILE ── */
+.prof-hdr{background:var(--green);padding:20px 18px 22px;display:flex;align-items:center;gap:14px;}
+.prof-av{width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:white;flex-shrink:0;position:relative;}
+.prof-ring{position:absolute;inset:-4px;border-radius:50%;border:3.5px solid transparent;}
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:12px 14px;}
+.stat-box{background:var(--surface);border-radius:12px;border:0.5px solid var(--border);padding:12px;text-align:center;}
+.stat-n{font-size:24px;font-weight:700;color:var(--text);}
+.stat-l{font-size:12px;color:var(--text3);margin-top:3px;}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:11px 18px;border-bottom:0.5px solid var(--border);background:var(--surface);}
+
+/* ── MODAL ── */
+.modal-overlay{background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;padding:20px;min-height:350px;}
+.modal-box{background:var(--surface);border-radius:16px;padding:22px;width:100%;}
+.modal-title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.modal-sub{font-size:13px;color:var(--text3);margin-bottom:16px;}
+.modal-actions{display:flex;gap:8px;margin-top:16px;}
+.btn-cancel{flex:1;padding:11px;border:0.5px solid var(--border2);border-radius:10px;background:transparent;font-size:13px;cursor:pointer;color:var(--text3);}
+.btn-save{flex:1;padding:11px;border:none;border-radius:10px;background:var(--green);color:white;font-size:13px;font-weight:600;cursor:pointer;}
+.copt{border:1.5px solid var(--border);border-radius:10px;padding:11px 13px;cursor:pointer;display:flex;align-items:center;gap:12px;background:var(--surface2);margin-bottom:8px;}
+.copt.on{border-color:var(--green);background:#f0fdf4;}
+.cswatch{width:20px;height:20px;border-radius:50%;flex-shrink:0;}
+textarea{width:100%;padding:10px;border:0.5px solid var(--border2);border-radius:8px;font-size:13px;font-family:inherit;resize:none;background:var(--surface);color:var(--text);outline:none;}
+input[type=text],input[type=password],input[type=email],select{width:100%;padding:10px 12px;border:0.5px solid var(--border2);border-radius:8px;font-size:14px;font-family:inherit;background:var(--surface);color:var(--text);outline:none;}
+input:focus,select:focus,textarea:focus{border-color:var(--green);}
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="notch"></div>
+  <div class="status"><span>9:41</span><span>⚡ 87%</span></div>
+  <div class="scroll" id="SCROLL">
+
+  <!-- ══════════ LOGIN ══════════ -->
+  <div id="s-login" class="screen active">
+    <div id="s-login" style="background:var(--green);min-height:760px;">
+    <div class="login-inner">
+      <div class="logo-wrap">
+        <div class="logo-circle">🏸</div>
+        <div class="login-title">Orleans Sports Club</div>
+        <div class="login-sub">Badminton · Orleans, France</div>
+      </div>
+      <div style="margin-bottom:14px;"><label class="field-lbl">Email</label><input class="field-input" id="l-email" type="text" placeholder="you@example.com"></div>
+      <div style="margin-bottom:14px;"><label class="field-lbl">Password</label><input class="field-input" id="l-pass" type="password" placeholder="••••••••"></div>
+      <div class="err-msg" id="l-err">Incorrect email or password.</div>
+      <button class="login-btn" onclick="doLogin()">Sign in</button>
+      <div class="demo-box">
+        <div class="demo-lbl">Demo accounts — tap to fill</div>
+        <div class="demo-row" onclick="af('admin@orleans-bad.fr','admin123')">
+          <span class="demo-txt">admin@orleans-bad.fr / admin123</span>
+          <span class="badge badge-amber">Admin</span>
+        </div>
+        <div class="demo-row" onclick="af('alex@orleans-bad.fr','member123')">
+          <span class="demo-txt">alex@orleans-bad.fr / member123</span>
+          <span class="badge badge-blue" style="background:rgba(219,234,254,0.3);color:rgba(255,255,255,0.85);">Member</span>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <!-- ══════════ MAIN APP ══════════ -->
+  <div id="s-app" class="screen">
+
+    <!-- HEADER -->
+    <div class="hdr" id="main-hdr">
+      <div class="hdr-l">
+        <button class="hdr-back" id="hdr-back" style="display:none;" onclick="goBack()">‹</button>
+        <div><div class="hdr-title" id="hdr-title">Home</div><div class="hdr-sub" id="hdr-sub">Orleans Sports Club</div></div>
+      </div>
+      <div class="hdr-r">
+        <button class="notif-btn" onclick="goScreen('notifications')"><span style="font-size:16px;">🔔</span><div class="notif-dot" id="notif-dot"></div></button>
+        <div class="av-sm" id="hdr-av" onclick="goScreen('profile')" style="background:var(--green2);">AL</div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div id="tab-home" class="tab">
+      <div class="hero">
+        <div class="hero-name" id="hero-name">Welcome back!</div>
+        <div class="hero-sub">Next session: Thu 19:00 · Court 2</div>
+        <div class="hero-grid">
+          <div class="hstat"><div class="hstat-n">12</div><div class="hstat-l">Games played</div></div>
+          <div class="hstat"><div class="hstat-n">8</div><div class="hstat-l">Wins</div></div>
+          <div class="hstat"><div class="hstat-n">#24</div><div class="hstat-l">Ranking</div></div>
+          <div class="hstat"><div class="hstat-n">67%</div><div class="hstat-l">Win rate</div></div>
+        </div>
+      </div>
+      <div style="padding:0 14px 10px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+        <button style="background:var(--green);color:white;border:none;border-radius:12px;padding:13px 10px;font-size:13px;font-weight:600;cursor:pointer;" onclick="goTab('courts')">📅 Book court</button>
+        <button style="background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:13px 10px;font-size:13px;font-weight:600;cursor:pointer;color:var(--text);" onclick="goTab('schedule')">🤝 Challenge</button>
+      </div>
+      <div class="sec">Latest news</div>
+      <div class="news-card"><div class="news-img">🏆</div><div class="news-body"><div style="font-size:14px;font-weight:600;color:var(--text);">Spring Tournament registrations open</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">18 Apr 2026 · Announcements</div></div></div>
+      <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="font-size:14px;font-weight:600;color:var(--text);">General Assembly</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Sat 25 Apr · 10:00 · Salle des Fêtes</div></div><span class="badge badge-amber">Upcoming</span></div></div>
+      <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="font-size:14px;font-weight:600;color:var(--text);">Court 3 closed for maintenance</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Mon 21 – Wed 23 Apr</div></div><span class="badge badge-red">Alert</span></div></div>
+      <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="font-size:14px;font-weight:600;color:var(--text);">New beginner coaching Saturdays</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Every Saturday from 9:00</div></div><span class="badge badge-green">New</span></div></div>
+      <div style="height:70px;"></div>
+    </div>
+
+    <!-- COURTS TAB -->
+    <div id="tab-courts" class="tab" style="display:none;">
+      <div class="date-scroll" id="date-row"></div>
+      <div style="padding:4px 14px 8px;display:flex;gap:8px;flex-wrap:wrap;">
+        <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--text3);"><span style="width:8px;height:8px;background:#dcfce7;border-radius:2px;display:inline-block;"></span>Free</span>
+        <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--text3);"><span style="width:8px;height:8px;background:#dbeafe;border-radius:2px;display:inline-block;"></span>Yours</span>
+        <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--text3);"><span style="width:8px;height:8px;background:var(--surface2);border-radius:2px;display:inline-block;"></span>Taken</span>
+        <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--text3);"><span style="width:8px;height:8px;background:#fee2e2;border-radius:2px;display:inline-block;"></span>Closed</span>
+      </div>
+      <div class="court-grid" id="court-grid"></div>
+      <div id="booking-modal" style="display:none;">
+        <div class="modal-overlay">
+          <div class="modal-box">
+            <div class="modal-title">Confirm booking</div>
+            <div class="modal-sub">You're about to book:</div>
+            <div style="background:var(--surface2);border-radius:8px;padding:12px;font-size:13px;font-weight:600;color:var(--text);" id="bk-summary"></div>
+            <div class="modal-actions"><button class="btn-cancel" onclick="document.getElementById('booking-modal').style.display='none'">Cancel</button><button class="btn-save" onclick="confirmBook()">Confirm</button></div>
+          </div>
+        </div>
+      </div>
+      <div style="height:70px;"></div>
+    </div>
+
+    <!-- TOURNAMENT TAB -->
+    <div id="tab-tourney" class="tab" style="display:none;">
+      <div style="padding:10px 14px 4px;display:flex;gap:8px;flex-wrap:wrap;"><span class="badge badge-green">Spring 2026</span><span class="badge badge-blue">Singles</span><span class="badge badge-amber">Final pending</span></div>
+      <div class="sec">Final · Sat 3 May · 14:00</div>
+      <div style="margin:0 14px 12px;"><div class="bracket-match"><div class="bm-row">🏸 Lucas Martin<span class="badge badge-amber">TBD</span></div><div class="bm-div"></div><div class="bm-row">🏸 Alex Lambert<span class="badge badge-amber">TBD</span></div></div></div>
+      <div class="sec">Semifinals</div>
+      <div style="margin:0 14px;">
+        <div class="bracket-match"><div class="bm-row bm-win">Lucas Martin<span>21–18, 21–15</span></div><div class="bm-div"></div><div class="bm-row bm-lose">Nina Rousseau</div></div>
+        <div class="bracket-match"><div class="bm-row bm-win">Alex Lambert<span>21–19, 17–21, 21–16</span></div><div class="bm-div"></div><div class="bm-row bm-lose">Tom Girard</div></div>
+      </div>
+      <div class="sec">Quarterfinals</div>
+      <div style="margin:0 14px;">
+        <div class="bracket-match"><div class="bm-row bm-win">Lucas Martin<span>21–14, 21–9</span></div><div class="bm-div"></div><div class="bm-row bm-lose">Pierre Dupont</div></div>
+        <div class="bracket-match"><div class="bm-row bm-win">Nina Rousseau<span>21–16, 21–18</span></div><div class="bm-div"></div><div class="bm-row bm-lose">Julien Leroy</div></div>
+        <div class="bracket-match"><div class="bm-row bm-win">Alex Lambert<span>21–11, 21–13</span></div><div class="bm-div"></div><div class="bm-row bm-lose">Marie Bernard</div></div>
+        <div class="bracket-match"><div class="bm-row bm-win">Tom Girard<span>18–21, 21–17, 21–19</span></div><div class="bm-div"></div><div class="bm-row bm-lose">Sophie Caron</div></div>
+      </div>
+      <div style="height:70px;"></div>
+    </div>
+
+    <!-- MEMBERS TAB -->
+    <div id="tab-members" class="tab" style="display:none;">
+      <div style="padding:10px 14px;background:var(--surface);border-bottom:0.5px solid var(--border);"><input type="text" placeholder="Search members…" oninput="filterM(this.value)" style="width:100%;"></div>
+      <div class="leg-bar" id="m-legend"></div>
+      <div id="m-list"></div>
+      <div id="seed-modal" style="display:none;"><div class="modal-overlay"><div class="modal-box"><div class="modal-title" id="sm-name"></div><div class="modal-sub">Select seeding colour</div><div id="sm-opts"></div><div class="modal-actions"><button class="btn-cancel" onclick="closeSeed()">Cancel</button><button class="btn-save" onclick="saveSeed()">Save</button></div></div></div></div>
+      <div style="height:70px;"></div>
+    </div>
+
+    <!-- POLLS TAB -->
+    <div id="tab-polls" class="tab" style="display:none;">
+      <div class="sec">Active polls</div>
+      <div class="poll-card"><div class="poll-q">Preferred training day?</div><div class="poll-opt"><div class="poll-bar-wrap"><div class="poll-bar" style="width:52%;"></div><span class="poll-bar-label">Tuesday</span></div><span class="poll-pct">52%</span></div><div class="poll-opt"><div class="poll-bar-wrap"><div class="poll-bar" style="width:31%;"></div><span class="poll-bar-label">Thursday</span></div><span class="poll-pct">31%</span></div><div class="poll-opt"><div class="poll-bar-wrap"><div class="poll-bar" style="width:17%;"></div><span class="poll-bar-label">Saturday</span></div><span class="poll-pct">17%</span></div><div style="font-size:12px;color:var(--text3);margin-top:8px;">87 votes · Closes 30 Apr</div></div>
+      <div class="poll-card"><div class="poll-q">Should we add beginner coaching?</div><div class="poll-opt"><div class="poll-bar-wrap"><div class="poll-bar" style="width:74%;"></div><span class="poll-bar-label">Yes!</span></div><span class="poll-pct">74%</span></div><div class="poll-opt"><div class="poll-bar-wrap"><div class="poll-bar" style="width:26%;"></div><span class="poll-bar-label">No</span></div><span class="poll-pct">26%</span></div><div style="font-size:12px;color:var(--text3);margin-top:8px;">62 votes · Closes 28 Apr</div></div>
+      <div class="poll-card"><div class="poll-q">Which court upgrade first?</div><div class="poll-opt"><div class="poll-bar-wrap"><div class="poll-bar" style="width:45%;"></div><span class="poll-bar-label">New flooring</span></div><span class="poll-pct">45%</span></div><div class="poll-opt"><div class="poll-bar-wrap"><div class="poll-bar" style="width:33%;"></div><span class="poll-bar-label">Better lighting</span></div><span class="poll-pct">33%</span></div><div class="poll-opt"><div class="poll-bar-wrap"><div class="poll-bar" style="width:22%;"></div><span class="poll-bar-label">More nets</span></div><span class="poll-pct">22%</span></div><div style="font-size:12px;color:var(--text3);margin-top:8px;">114 votes · Closes 5 May</div></div>
+      <div id="new-poll-modal" style="display:none;"><div class="modal-overlay"><div class="modal-box"><div class="modal-title">Create a poll</div><div style="margin-bottom:12px;"><label style="font-size:13px;color:var(--text3);display:block;margin-bottom:4px;">Question</label><input type="text" id="poll-q-input" placeholder="Ask the club something…"></div><div style="margin-bottom:12px;"><label style="font-size:13px;color:var(--text3);display:block;margin-bottom:4px;">Options (one per line)</label><textarea id="poll-opts-input" rows="4" placeholder="Option A&#10;Option B&#10;Option C"></textarea></div><div class="modal-actions"><button class="btn-cancel" onclick="document.getElementById('new-poll-modal').style.display='none'">Cancel</button><button class="btn-save" onclick="submitPoll()">Create</button></div></div></div></div>
+      <div id="poll-btn-area" style="padding:0 14px 14px;"></div>
+      <div style="height:70px;"></div>
+    </div>
+
+    <!-- NOTIFICATIONS SCREEN -->
+    <div id="tab-notifications" class="tab" style="display:none;">
+      <div class="notif-item notif-unread"><div class="notif-icon" style="background:#dcfce7;">🏆</div><div><div style="font-size:14px;font-weight:600;color:var(--text);">Tournament final scheduled</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Your final vs Lucas Martin is Sat 3 May · 14:00</div><div style="font-size:11px;color:var(--text3);margin-top:3px;">2 hours ago</div></div></div>
+      <div class="notif-item notif-unread"><div class="notif-icon" style="background:#dbeafe;">🏸</div><div><div style="font-size:14px;font-weight:600;color:var(--text);">Match challenge received</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Nina Rousseau challenged you to a friendly match</div><div style="font-size:11px;color:var(--text3);margin-top:3px;">5 hours ago</div><div style="display:flex;gap:8px;margin-top:8px;"><button class="btn-save" style="flex:0;padding:7px 14px;font-size:12px;">Accept</button><button class="btn-cancel" style="flex:0;padding:7px 14px;font-size:12px;">Decline</button></div></div></div>
+      <div class="notif-item"><div class="notif-icon" style="background:#fef3c7;">📅</div><div><div style="font-size:14px;font-weight:600;color:var(--text);">Booking reminder</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Court 2 booked tomorrow at 18:00</div><div style="font-size:11px;color:var(--text3);margin-top:3px;">Yesterday</div></div></div>
+      <div class="notif-item"><div class="notif-icon" style="background:#fee2e2;">⚠️</div><div><div style="font-size:14px;font-weight:600;color:var(--text);">Court 3 closed</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Maintenance Mon 21 – Wed 23 Apr</div><div style="font-size:11px;color:var(--text3);margin-top:3px;">2 days ago</div></div></div>
+      <div class="notif-item"><div class="notif-icon" style="background:#f0fdf4;">📊</div><div><div style="font-size:14px;font-weight:600;color:var(--text);">New poll posted</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Vote on which court upgrade to prioritise</div><div style="font-size:11px;color:var(--text3);margin-top:3px;">3 days ago</div></div></div>
+      <div class="notif-item"><div class="notif-icon" style="background:#ede9fe;">🏅</div><div><div style="font-size:14px;font-weight:600;color:var(--text);">Membership renewed</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Your 2026 membership is confirmed. Welcome back!</div><div style="font-size:11px;color:var(--text3);margin-top:3px;">1 week ago</div></div></div>
+      <div style="height:70px;"></div>
+    </div>
+
+    <!-- MATCH SCHEDULING SCREEN -->
+    <div id="tab-schedule" class="tab" style="display:none;">
+      <div class="sec">Choose an opponent</div>
+      <div style="padding:0 14px 4px;" id="opp-list"></div>
+      <div class="sec">Select date & time</div>
+      <div class="date-scroll" id="sched-dates"></div>
+      <div style="padding:4px 14px 10px;">
+        <div class="time-grid" id="time-grid"></div>
+      </div>
+      <div class="sec">Court preference</div>
+      <div style="padding:0 14px 10px;"><select id="court-pick"><option>Court 1</option><option>Court 2</option><option>Court 4</option></select></div>
+      <div style="padding:0 14px 14px;"><button class="btn-main" onclick="sendChallenge()">Send challenge</button></div>
+      <div id="challenge-sent" style="display:none;">
+        <div class="modal-overlay"><div class="modal-box" style="text-align:center;">
+          <div style="font-size:48px;margin-bottom:12px;">🏸</div>
+          <div class="modal-title" style="text-align:center;font-size:18px;">Challenge sent!</div>
+          <div style="font-size:13px;color:var(--text3);margin-top:6px;margin-bottom:16px;" id="challenge-msg"></div>
+          <button class="btn-main" onclick="document.getElementById('challenge-sent').style.display='none'">Done</button>
+        </div></div>
+      </div>
+      <div style="height:70px;"></div>
+    </div>
+
+    <!-- SHOP SCREEN -->
+    <div id="tab-shop" class="tab" style="display:none;">
+      <div class="sec">Membership fees</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:0 14px 4px;">
+        <div style="background:var(--green);border-radius:14px;padding:14px;color:white;"><div style="font-size:11px;opacity:.7;text-transform:uppercase;font-weight:600;letter-spacing:.4px;">Adult</div><div style="font-size:26px;font-weight:700;margin:6px 0;">€95</div><div style="font-size:11px;opacity:.75;">per season</div><button style="background:white;color:var(--green);border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;margin-top:10px;width:100%;">Renew</button></div>
+        <div style="background:var(--surface);border:0.5px solid var(--border);border-radius:14px;padding:14px;"><div style="font-size:11px;color:var(--text3);text-transform:uppercase;font-weight:600;letter-spacing:.4px;">Junior</div><div style="font-size:26px;font-weight:700;margin:6px 0;color:var(--text);">€55</div><div style="font-size:11px;color:var(--text3);">per season</div><button style="background:var(--green);color:white;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;margin-top:10px;width:100%;">Renew</button></div>
+      </div>
+      <div class="sec">Club shop</div>
+      <div class="shop-item"><div class="shop-img" style="background:#e8f5e9;">🏸</div><div class="shop-body"><div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="font-size:14px;font-weight:600;color:var(--text);">Club shuttle tube (12)</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Yonex AS30 · Speed 77</div></div><span class="shop-price">€18</span></div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;"><span class="badge badge-green">In stock</span><button class="shop-cart-btn">Add to cart</button></div></div></div>
+      <div class="shop-item"><div class="shop-img" style="background:#e3f2fd;">👕</div><div class="shop-body"><div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="font-size:14px;font-weight:600;color:var(--text);">Club polo shirt</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">S / M / L / XL · Green</div></div><span class="shop-price">€32</span></div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;"><span class="badge badge-green">In stock</span><button class="shop-cart-btn">Add to cart</button></div></div></div>
+      <div class="shop-item"><div class="shop-img" style="background:#fff8e1;">🎒</div><div class="shop-body"><div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="font-size:14px;font-weight:600;color:var(--text);">Club kit bag</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Embroidered logo · Black</div></div><span class="shop-price">€45</span></div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;"><span class="badge badge-red">Low stock</span><button class="shop-cart-btn">Add to cart</button></div></div></div>
+      <div style="height:70px;"></div>
+    </div>
+
+    <!-- STATS / LEADERBOARD SCREEN -->
+    <div id="tab-stats" class="tab" style="display:none;">
+      <div class="sec">Your stats — Season 2026</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:0 14px 10px;">
+        <div class="stat-box"><div class="stat-n">12</div><div class="stat-l">Games played</div></div>
+        <div class="stat-box"><div class="stat-n">8</div><div class="stat-l">Wins</div></div>
+        <div class="stat-box"><div class="stat-n">67%</div><div class="stat-l">Win rate</div></div>
+        <div class="stat-box"><div class="stat-n">#24</div><div class="stat-l">Club ranking</div></div>
+      </div>
+      <div class="sec">Performance by month</div>
+      <div class="chart-bar-wrap">
+        <div class="chart-bar-row"><div class="chart-bar-lbl">Jan</div><div class="chart-bar-bg"><div class="chart-bar-fill" style="width:40%;"></div></div><div class="chart-bar-val">2/5</div></div>
+        <div class="chart-bar-row"><div class="chart-bar-lbl">Feb</div><div class="chart-bar-bg"><div class="chart-bar-fill" style="width:67%;"></div></div><div class="chart-bar-val">4/6</div></div>
+        <div class="chart-bar-row"><div class="chart-bar-lbl">Mar</div><div class="chart-bar-bg"><div class="chart-bar-fill" style="width:50%;"></div></div><div class="chart-bar-val">3/6</div></div>
+        <div class="chart-bar-row"><div class="chart-bar-lbl">Apr</div><div class="chart-bar-bg"><div class="chart-bar-fill" style="width:100%;"></div></div><div class="chart-bar-val">3/3</div></div>
+      </div>
+      <div class="sec">Club leaderboard</div>
+      <div id="lb-list"></div>
+      <div style="height:70px;"></div>
+    </div>
+
+    <!-- CALENDAR SCREEN -->
+    <div id="tab-calendar" class="tab" style="display:none;">
+      <div style="padding:12px 14px 4px;display:flex;justify-content:space-between;align-items:center;background:var(--surface);border-bottom:0.5px solid var(--border);">
+        <button onclick="" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text);">‹</button>
+        <div style="font-size:15px;font-weight:600;color:var(--text);">April 2026</div>
+        <button onclick="" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text);">›</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div class="sec">Upcoming events</div>
+      <div class="event-item"><div style="font-size:13px;font-weight:600;color:var(--text);">Club session</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Thu 24 Apr · 19:00–21:00 · Courts 1–4</div></div>
+      <div class="event-item"><div style="font-size:13px;font-weight:600;color:var(--text);">General Assembly</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Sat 25 Apr · 10:00 · Salle des Fêtes</div></div>
+      <div class="event-item"><div style="font-size:13px;font-weight:600;color:var(--text);">Club session</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Tue 29 Apr · 19:00–21:00 · Courts 1–4</div></div>
+      <div class="event-item"><div style="font-size:13px;font-weight:600;color:var(--text);">Spring Tournament — Final</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Sat 3 May · 14:00 · Main hall</div></div>
+      <div class="event-item"><div style="font-size:13px;font-weight:600;color:var(--text);">Beginner coaching</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">Sat 3 May · 09:00–10:30</div></div>
+      <div style="height:70px;"></div>
+    </div>
+
+    <!-- ADMIN PANEL SCREEN -->
+    <div id="tab-admin" class="tab" style="display:none;">
+      <div class="sec">Club overview</div>
+      <div class="admin-stat-row">
+        <div class="admin-stat"><div class="admin-stat-n">200</div><div class="admin-stat-l">Total members</div></div>
+        <div class="admin-stat"><div class="admin-stat-n">4</div><div class="admin-stat-l">Active courts</div></div>
+        <div class="admin-stat"><div class="admin-stat-n">18</div><div class="admin-stat-l">Bookings today</div></div>
+        <div class="admin-stat"><div class="admin-stat-n">3</div><div class="admin-stat-l">Active polls</div></div>
+      </div>
+      <div class="sec">Member management</div>
+      <div class="admin-row" onclick="goTab('members')"><div><div style="font-size:14px;font-weight:600;color:var(--text);">View all members</div><div style="font-size:12px;color:var(--text3);margin-top:1px;">Edit seeding, roles, details</div></div><span style="font-size:18px;color:var(--text3);">›</span></div>
+      <div class="admin-row" onclick="showAddMember()"><div><div style="font-size:14px;font-weight:600;color:var(--text);">Add new member</div><div style="font-size:12px;color:var(--text3);margin-top:1px;">Register a new club member</div></div><span style="font-size:18px;color:var(--text3);">›</span></div>
+      <div class="admin-row"><div><div style="font-size:14px;font-weight:600;color:var(--text);">Pending renewals</div><div style="font-size:12px;color:var(--text3);margin-top:1px;">14 members to renew by May</div></div><span class="badge badge-amber">14</span></div>
+      <div class="sec">Content management</div>
+      <div class="admin-row" onclick="goTab('polls');setTimeout(()=>document.getElementById('new-poll-modal').style.display='block',100)"><div><div style="font-size:14px;font-weight:600;color:var(--text);">Create a poll</div><div style="font-size:12px;color:var(--text3);margin-top:1px;">Post a vote to all members</div></div><span style="font-size:18px;color:var(--text3);">›</span></div>
+      <div class="admin-row" onclick="goTab('calendar')"><div><div style="font-size:14px;font-weight:600;color:var(--text);">Manage events</div><div style="font-size:12px;color:var(--text3);margin-top:1px;">Add & edit calendar events</div></div><span style="font-size:18px;color:var(--text3);">›</span></div>
+      <div class="admin-row"><div><div style="font-size:14px;font-weight:600;color:var(--text);">Post announcement</div><div style="font-size:12px;color:var(--text3);margin-top:1px;">Push a news item to members</div></div><span style="font-size:18px;color:var(--text3);">›</span></div>
+      <div class="sec">Court management</div>
+      <div class="admin-row"><div><div style="font-size:14px;font-weight:600;color:var(--text);">Open/close courts</div><div style="font-size:12px;color:var(--text3);margin-top:1px;">Block slots for maintenance</div></div><span style="font-size:18px;color:var(--text3);">›</span></div>
+      <div class="admin-row" onclick="goTab('courts')"><div><div style="font-size:14px;font-weight:600;color:var(--text);">View all bookings</div><div style="font-size:12px;color:var(--text3);margin-top:1px;">See and manage all reservations</div></div><span style="font-size:18px;color:var(--text3);">›</span></div>
+      <div id="add-member-modal" style="display:none;">
+        <div class="modal-overlay"><div class="modal-box">
+          <div class="modal-title">Add new member</div>
+          <div style="margin-bottom:10px;"><label style="font-size:13px;color:var(--text3);display:block;margin-bottom:4px;">Full name</label><input type="text" placeholder="First Last"></div>
+          <div style="margin-bottom:10px;"><label style="font-size:13px;color:var(--text3);display:block;margin-bottom:4px;">Email</label><input type="text" placeholder="member@example.com"></div>
+          <div style="margin-bottom:10px;"><label style="font-size:13px;color:var(--text3);display:block;margin-bottom:4px;">Level</label><select><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select></div>
+          <div style="margin-bottom:4px;"><label style="font-size:13px;color:var(--text3);display:block;margin-bottom:4px;">Seeding colour</label><select id="new-seed-sel"><option value="none">No colour</option><option value="green">Green</option><option value="blue">Blue</option><option value="red">Red</option><option value="black">Black</option></select></div>
+          <div class="modal-actions"><button class="btn-cancel" onclick="document.getElementById('add-member-modal').style.display='none'">Cancel</button><button class="btn-save" onclick="addMember()">Add member</button></div>
+        </div></div>
+      </div>
+      <div style="height:70px;"></div>
+    </div>
+
+    <!-- PROFILE SCREEN -->
+    <div id="tab-profile" class="tab" style="display:none;">
+      <div class="prof-hdr" id="prof-hdr">
+        <div style="position:relative;flex-shrink:0;">
+          <div class="prof-av" id="prof-av" style="background:var(--green2);">AL<div class="prof-ring" id="prof-ring"></div></div>
+        </div>
+        <div>
+          <div style="font-size:19px;font-weight:700;color:white;" id="prof-name">Alex Lambert</div>
+          <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:2px;" id="prof-detail">Singles & Doubles · Advanced</div>
+          <span class="seed-chip" id="prof-seed-chip" style="margin-top:6px;background:rgba(255,255,255,0.15);color:white;"></span>
+        </div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="stat-n">#2</div><div class="stat-l">Club ranking</div></div>
+        <div class="stat-box"><div class="stat-n">12</div><div class="stat-l">Games played</div></div>
+        <div class="stat-box"><div class="stat-n">8</div><div class="stat-l">Wins</div></div>
+        <div class="stat-box"><div class="stat-n">67%</div><div class="stat-l">Win rate</div></div>
+      </div>
+      <div class="info-row"><span style="font-size:13px;color:var(--text3);">Email</span><span style="font-size:13px;color:var(--text);" id="prof-email">alex@orleans-bad.fr</span></div>
+      <div class="info-row"><span style="font-size:13px;color:var(--text3);">Member since</span><span style="font-size:13px;color:var(--text);">September 2021</span></div>
+      <div class="info-row"><span style="font-size:13px;color:var(--text3);">Role</span><span class="badge badge-blue" id="prof-role">Member</span></div>
+      <div class="info-row"><span style="font-size:13px;color:var(--text3);">Membership</span><span class="badge badge-green">Active · 2026</span></div>
+      <div style="padding:16px 14px;display:flex;flex-direction:column;gap:8px;">
+        <button class="btn-main" onclick="goTab('schedule')">Challenge a member 🏸</button>
+        <button class="btn-main" style="background:var(--surface);color:var(--text);border:0.5px solid var(--border);" onclick="goTab('shop')">Club shop 🛒</button>
+        <button class="btn-out" style="width:100%;" onclick="signOut()">Sign out</button>
+      </div>
+      <div style="height:70px;"></div>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <nav class="nav" id="main-nav">
+      <button class="nb on" id="nb-home" onclick="goTab('home')"><span class="ni">🏠</span>Home<div class="ni-bar"></div></button>
+      <button class="nb" id="nb-courts" onclick="goTab('courts')"><span class="ni">🏸</span>Courts<div class="ni-bar"></div></button>
+      <button class="nb" id="nb-tourney" onclick="goTab('tourney')"><span class="ni">🏆</span>Tourney<div class="ni-bar"></div></button>
+      <button class="nb" id="nb-members" onclick="goTab('members')"><span class="ni">👥</span>Members<div class="ni-bar"></div></button>
+      <button class="nb" id="nb-more" onclick="toggleMore()"><span class="ni">⋯</span>More<div class="ni-bar"></div></button>
+    </nav>
+
+    <!-- MORE MENU -->
+    <div id="more-menu" style="display:none;position:absolute;bottom:60px;right:0;left:0;background:var(--surface);border-top:0.5px solid var(--border);z-index:60;padding:8px 0;">
+      <div onclick="goTab('polls');toggleMore();" style="padding:12px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;font-size:14px;color:var(--text);"><span style="font-size:20px;">📊</span>Polls</div>
+      <div onclick="goTab('stats');toggleMore();" style="padding:12px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;font-size:14px;color:var(--text);"><span style="font-size:20px;">📈</span>Stats & leaderboard</div>
+      <div onclick="goTab('calendar');toggleMore();" style="padding:12px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;font-size:14px;color:var(--text);"><span style="font-size:20px;">📅</span>Event calendar</div>
+      <div onclick="goTab('schedule');toggleMore();" style="padding:12px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;font-size:14px;color:var(--text);"><span style="font-size:20px;">🤝</span>Match scheduling</div>
+      <div onclick="goTab('shop');toggleMore();" style="padding:12px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;font-size:14px;color:var(--text);"><span style="font-size:20px;">🛒</span>Shop & membership</div>
+      <div id="admin-menu-item" style="display:none;padding:12px 18px;display:none;align-items:center;gap:12px;cursor:pointer;font-size:14px;color:var(--amber);" onclick="goTab('admin');toggleMore();"><span style="font-size:20px;">⚙️</span>Admin panel</div>
+    </div>
+  </div>
+
+  </div><!-- end scroll -->
+</div>
+
+<script>
+const ACCS={'admin@orleans-bad.fr':{pass:'admin123',role:'admin',name:'Admin',ini:'AD',bg:'#b45309'},'alex@orleans-bad.fr':{pass:'member123',role:'member',name:'Alex Lambert',ini:'AL',bg:'#2d6a4a'}};
+const COLOURS=[{id:'black',label:'Black',sw:'#1c1c1e',ring:'#1c1c1e',bg:'#ebebeb',tc:'#1c1c1e'},{id:'red',label:'Red',sw:'#d32f2f',ring:'#d32f2f',bg:'#fee2e2',tc:'#991b1b'},{id:'blue',label:'Blue',sw:'#1565c0',ring:'#1565c0',bg:'#dbeafe',tc:'#1e40af'},{id:'green',label:'Green',sw:'#2e7d32',ring:'#2e7d32',bg:'#dcfce7',tc:'#166534'},{id:'none',label:'No colour',sw:'#ccc',ring:'transparent',bg:'#f5f5f0',tc:'#888'}];
+let members=[
+  {id:1,ini:'LM',name:'Lucas Martin',det:'Singles · Advanced',rank:1,bg:'#1a3a2a',seed:'black',wins:22,played:28},
+  {id:2,ini:'AL',name:'Alex Lambert',det:'Singles & Doubles · Advanced',rank:2,bg:'#2d6a4a',seed:'black',wins:19,played:26},
+  {id:3,ini:'NR',name:'Nina Rousseau',det:'Singles · Advanced',rank:3,bg:'#185fa5',seed:'red',wins:17,played:24},
+  {id:4,ini:'TG',name:'Tom Girard',det:'Doubles · Intermediate',rank:4,bg:'#854f0b',seed:'red',wins:14,played:22},
+  {id:5,ini:'SC',name:'Sophie Caron',det:'Doubles · Intermediate',rank:5,bg:'#993556',seed:'blue',wins:11,played:20},
+  {id:6,ini:'PD',name:'Pierre Dupont',det:'Singles · Intermediate',rank:6,bg:'#534ab7',seed:'blue',wins:9,played:18},
+  {id:7,ini:'MB',name:'Marie Bernard',det:'Singles · Beginner',rank:7,bg:'#0f6e56',seed:'green',wins:6,played:14},
+  {id:8,ini:'JL',name:'Julien Leroy',det:'Doubles · Beginner',rank:8,bg:'#6d4c41',seed:'green',wins:4,played:12},
+  {id:9,ini:'CF',name:'Camille Faure',det:'Singles · Beginner',rank:9,bg:'#5f5e5a',seed:'none',wins:2,played:8},
+];
+const DATES=['Mon 21','Tue 22','Wed 23','Thu 24','Fri 25','Sat 26'];
+const COURTS_DATA={'Mon 21':[{name:'Court 1',slots:[{t:'18:00',s:'taken'},{t:'19:00',s:'free'},{t:'20:00',s:'free'},{t:'21:00',s:'taken'}]},{name:'Court 2',slots:[{t:'18:00',s:'mine'},{t:'19:00',s:'taken'},{t:'20:00',s:'free'},{t:'21:00',s:'free'}]},{name:'Court 3',slots:[{t:'All day',s:'closed'}]},{name:'Court 4',slots:[{t:'18:00',s:'free'},{t:'19:00',s:'free'},{t:'20:00',s:'taken'},{t:'21:00',s:'taken'}]}],'Tue 22':[{name:'Court 1',slots:[{t:'18:00',s:'free'},{t:'19:00',s:'free'},{t:'20:00',s:'taken'},{t:'21:00',s:'free'}]},{name:'Court 2',slots:[{t:'18:00',s:'taken'},{t:'19:00',s:'free'},{t:'20:00',s:'free'},{t:'21:00',s:'taken'}]},{name:'Court 3',slots:[{t:'All day',s:'closed'}]},{name:'Court 4',slots:[{t:'18:00',s:'free'},{t:'19:00',s:'taken'},{t:'20:00',s:'free'},{t:'21:00',s:'free'}]}],'Thu 24':[{name:'Court 1',slots:[{t:'18:00',s:'free'},{t:'19:00',s:'free'},{t:'20:00',s:'free'},{t:'21:00',s:'free'}]},{name:'Court 2',slots:[{t:'18:00',s:'free'},{t:'19:00',s:'mine'},{t:'20:00',s:'taken'},{t:'21:00',s:'free'}]},{name:'Court 3',slots:[{t:'18:00',s:'taken'},{t:'19:00',s:'free'},{t:'20:00',s:'free'},{t:'21:00',s:'taken'}]},{name:'Court 4',slots:[{t:'18:00',s:'free'},{t:'19:00',s:'free'},{t:'20:00',s:'free'},{t:'21:00',s:'taken'}]}]};
+const TIMES=['18:00','18:30','19:00','19:30','20:00','20:30'];
+const CAL_EVENTS=[21,22,24,25,26,29,3];
+
+let cu=null,activeTab='home',selDate='Mon 21',mFilter='all',mQ='',editId=null,pendingC=null,pendingSlot=null,selOpp=null,selTime=null,moreOpen=false,navStack=[];
+
+function af(e,p){document.getElementById('l-email').value=e;document.getElementById('l-pass').value=p;}
+function doLogin(){
+  const e=document.getElementById('l-email').value.trim().toLowerCase();
+  const p=document.getElementById('l-pass').value;
+  const acc=ACCS[e];
+  if(acc&&acc.pass===p){
+    document.getElementById('l-err').style.display='none';
+    cu={...acc,email:e};
+    document.getElementById('s-login').classList.remove('active');
+    document.getElementById('s-app').classList.add('active');
+    document.getElementById('hero-name').textContent='Welcome back, '+acc.name.split(' ')[0]+'!';
+    document.getElementById('hdr-av').textContent=acc.ini;
+    document.getElementById('hdr-av').style.background=acc.bg;
+    document.getElementById('role-badge')&&(()=>{})();
+    if(acc.role==='admin'){document.getElementById('admin-menu-item').style.display='flex';}
+    updateProfile();
+    goTab('home');
+  } else {
+    document.getElementById('l-err').style.display='block';
+  }
+}
+function signOut(){cu=null;document.getElementById('s-app').classList.remove('active');document.getElementById('s-login').classList.add('active');document.getElementById('l-email').value='';document.getElementById('l-pass').value='';}
+
+function updateProfile(){
+  if(!cu)return;
+  const m=members.find(x=>x.ini===cu.ini)||members[1];
+  const c=getC(cu.role==='admin'?'none':m?m.seed:'none');
+  document.getElementById('prof-name').textContent=cu.name;
+  document.getElementById('prof-email').textContent=cu.email;
+  document.getElementById('prof-role').textContent=cu.role==='admin'?'Admin':'Member';
+  document.getElementById('prof-role').className='badge '+(cu.role==='admin'?'badge-amber':'badge-blue');
+  document.getElementById('prof-av').style.background=cu.bg;
+  document.getElementById('prof-av').querySelector('span')||document.getElementById('prof-av').prepend(document.createTextNode(cu.ini));
+  document.getElementById('prof-ring').style.borderColor=c.ring;
+  document.getElementById('prof-seed-chip').innerHTML=`<span class="seed-dot" style="background:${c.sw};"></span>${c.label}`;
+}
+
+function goTab(t){
+  document.querySelectorAll('.tab').forEach(x=>x.style.display='none');
+  document.querySelectorAll('.nb').forEach(x=>x.classList.remove('on'));
+  const el=document.getElementById('tab-'+t);
+  if(el){el.style.display='block';document.getElementById('SCROLL').scrollTop=0;}
+  const navTabs=['home','courts','tourney','members'];
+  if(navTabs.includes(t)){document.getElementById('nb-'+t)&&document.getElementById('nb-'+t).classList.add('on');}
+  const titles={home:'Home',courts:'Court booking',tourney:'Tournament',members:'Members',polls:'Polls',notifications:'Notifications',schedule:'Match scheduling',shop:'Shop & membership',stats:'Stats & leaderboard',calendar:'Event calendar',admin:'Admin panel',profile:'My profile'};
+  document.getElementById('hdr-title').textContent=titles[t]||t;
+  const showBack=['notifications','schedule','shop','stats','calendar','admin','profile','polls'];
+  document.getElementById('hdr-back').style.display=showBack.includes(t)?'block':'none';
+  if(t==='courts')renderCourts();
+  if(t==='members'){renderMLegend();renderMembers();}
+  if(t==='polls')renderPollBtn();
+  if(t==='stats')renderLB();
+  if(t==='calendar')renderCal();
+  if(t==='schedule')renderSchedule();
+  if(t==='notifications')document.getElementById('notif-dot').style.display='none';
+  activeTab=t;
+}
+function goBack(){const prev='home';goTab(prev);}
+function goScreen(s){goTab(s);}
+function toggleMore(){moreOpen=!moreOpen;document.getElementById('more-menu').style.display=moreOpen?'block':'none';}
+
+// COURTS
+function renderCourts(){
+  document.getElementById('date-row').innerHTML=DATES.map(d=>`<div class="date-chip ${d===selDate?'on':''}" onclick="selDate='${d}';renderCourts();">${d}</div>`).join('');
+  const data=COURTS_DATA[selDate]||COURTS_DATA['Mon 21'];
+  document.getElementById('court-grid').innerHTML=data.map(c=>`<div class="court-card"><div class="court-name">${c.name}</div>${c.slots.map(s=>{const cls=s.s==='free'?'slot-free':s.s==='mine'?'slot-mine':s.s==='closed'?'slot-closed':'slot-taken';const click=s.s==='free'?`onclick="bookSlot('${c.name}','${s.t}')"`:s.s==='mine'?`onclick="cancelMySlot('${c.name}','${s.t}')"`:''  ;const lbl=s.s==='free'?'Free':s.s==='mine'?'Yours':s.s==='closed'?'Closed':'Taken';return `<div class="slot ${cls}" ${click}><span>${s.t}</span><span>${lbl}</span></div>`;}).join('')}</div>`).join('');
+}
+function bookSlot(court,time){pendingSlot={court,time,date:selDate};document.getElementById('bk-summary').innerHTML=`<strong>${court}</strong> · ${selDate} · ${time}`;document.getElementById('booking-modal').style.display='block';}
+function confirmBook(){document.getElementById('booking-modal').style.display='none';alert('✅ Booked: '+pendingSlot.court+' on '+pendingSlot.date+' at '+pendingSlot.time);pendingSlot=null;}
+function cancelMySlot(c,t){if(confirm('Cancel your booking for '+c+' at '+t+'?')){}}
+
+// MEMBERS
+function getC(id){return COLOURS.find(c=>c.id===id)||COLOURS[4];}
+function renderMLegend(){
+  document.getElementById('m-legend').innerHTML=[{id:'all',label:'All',sw:null},...COLOURS].map(c=>`<div class="leg-chip ${mFilter===c.id?'on':''}" onclick="mFilter='${c.id}';renderMLegend();renderMembers();">${c.sw?`<div class="leg-dot" style="background:${c.sw};${c.id==='none'?'border:1px solid #bbb;':''}"></div>`:''} ${c.label}</div>`).join('');
+}
+function filterM(q){mQ=q;renderMembers();}
+function renderMembers(){
+  const isA=cu&&cu.role==='admin';
+  const filtered=members.filter(m=>m.name.toLowerCase().includes(mQ.toLowerCase())&&(mFilter==='all'||m.seed===mFilter));
+  document.getElementById('m-list').innerHTML=filtered.map(m=>{const c=getC(m.seed);return `<div class="mem-row" onclick="viewMemberProfile(${m.id})"><div class="av" style="background:${m.bg};">${m.ini}<div class="av-ring" style="border-color:${m.seed!=='none'?c.ring:'transparent'};"></div></div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;color:var(--text);">${m.name}</div><div style="font-size:12px;color:var(--text3);margin-top:1px;">${m.det}</div></div><div style="display:flex;align-items:center;gap:6px;flex-shrink:0;"><span class="seed-chip" style="background:${c.bg};color:${c.tc};"><span class="seed-dot" style="background:${c.sw};${m.seed==='none'?'border:1px solid #bbb;':''}"></span>${c.label}</span><span style="font-size:13px;font-weight:600;color:var(--text3);">#${m.rank}</span>${isA?`<div class="edit-b" style="width:28px;height:28px;border-radius:6px;border:0.5px solid #ddd;background:#f5f5f0;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;" onclick="event.stopPropagation();openSeed(${m.id})">✏️</div>`:''}</div></div>`;}).join('')+(filtered.length>=members.length?'<div style="padding:12px 16px;font-size:12px;color:var(--text3);">191 more members…</div>':'');
+}
+function openSeed(id){editId=id;const m=members.find(x=>x.id===id);pendingC=m.seed;document.getElementById('sm-name').textContent=m.name;document.getElementById('sm-opts').innerHTML=COLOURS.map(c=>`<div class="copt ${m.seed===c.id?'on':''}" onclick="pendingC='${c.id}';document.querySelectorAll('.copt').forEach(x=>x.classList.remove('on'));this.classList.add('on');"><div class="cswatch" style="background:${c.sw};${c.id==='none'?'border:1.5px solid #bbb;':''}"></div><span style="font-size:14px;font-weight:600;color:var(--text);">${c.label}</span></div>`).join('');document.getElementById('seed-modal').style.display='block';document.getElementById('m-list').style.display='none';}
+function closeSeed(){document.getElementById('seed-modal').style.display='none';document.getElementById('m-list').style.display='block';}
+function saveSeed(){if(editId&&pendingC)members=members.map(m=>m.id===editId?{...m,seed:pendingC}:m);closeSeed();renderMembers();}
+function viewMemberProfile(id){
+  const m=members.find(x=>x.id===id);const c=getC(m.seed);
+  document.getElementById('tab-members').style.display='none';
+  const pv=document.getElementById('tab-profile');
+  document.getElementById('prof-name').textContent=m.name;
+  document.getElementById('prof-detail').textContent=m.det;
+  document.getElementById('prof-av').style.background=m.bg;
+  document.getElementById('prof-av').firstChild.textContent=m.ini;
+  document.getElementById('prof-ring').style.borderColor=c.ring;
+  document.getElementById('prof-seed-chip').innerHTML=`<span class="seed-dot" style="background:${c.sw};"></span>${c.label}`;
+  document.getElementById('prof-seed-chip').style.cssText='margin-top:6px;background:rgba(255,255,255,0.15);color:white;display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;';
+  pv.style.display='block';
+  document.getElementById('hdr-title').textContent=m.name;
+  document.getElementById('hdr-back').style.display='block';
+  document.getElementById('hdr-back').onclick=()=>{pv.style.display='none';document.getElementById('tab-members').style.display='block';document.getElementById('hdr-title').textContent='Members';document.getElementById('hdr-back').style.display='none';};
+}
+
+// POLLS
+function renderPollBtn(){document.getElementById('poll-btn-area').innerHTML=cu&&cu.role==='admin'?`<button class="btn-main" onclick="document.getElementById('new-poll-modal').style.display='block'">+ Create new poll</button>`:'';}
+function submitPoll(){const q=document.getElementById('poll-q-input').value.trim();if(!q)return;document.getElementById('new-poll-modal').style.display='none';document.getElementById('poll-q-input').value='';alert('Poll created: "'+q+'"');}
+
+// SCHEDULE
+function renderSchedule(){
+  const opps=members.filter(m=>m.ini!==cu.ini);
+  document.getElementById('opp-list').innerHTML=opps.slice(0,5).map(m=>`<div class="match-opp-card ${selOpp===m.id?'selected':''}" onclick="selOpp=${m.id};renderSchedule();"><div class="av" style="background:${m.bg};width:36px;height:36px;font-size:12px;">${m.ini}</div><div><div style="font-size:13px;font-weight:600;color:var(--text);">${m.name}</div><div style="font-size:11px;color:var(--text3);">${m.det}</div></div></div>`).join('');
+  document.getElementById('sched-dates').innerHTML=DATES.map(d=>`<div class="date-chip ${selDate===d?'on':''}" onclick="selDate='${d}';renderSchedule();">${d}</div>`).join('');
+  document.getElementById('time-grid').innerHTML=TIMES.map(t=>`<div class="time-chip ${selTime===t?'on':''}" onclick="selTime='${t}';renderSchedule();">${t}</div>`).join('');
+}
+function sendChallenge(){
+  if(!selOpp||!selTime){alert('Please select an opponent and a time.');return;}
+  const m=members.find(x=>x.id===selOpp);
+  document.getElementById('challenge-msg').textContent=`Challenge sent to ${m.name} for ${selDate} at ${selTime} on ${document.getElementById('court-pick').value}`;
+  document.getElementById('challenge-sent').style.display='block';
+  selOpp=null;selTime=null;
+}
+
+// STATS / LB
+function renderLB(){
+  document.getElementById('lb-list').innerHTML=members.map(m=>{
+    const pct=Math.round(m.wins/m.played*100);
+    return `<div class="lb-row"><div class="lb-rank ${m.rank<=3?'top':''}">${m.rank<=1?'🥇':m.rank<=2?'🥈':m.rank<=3?'🥉':'#'+m.rank}</div><div class="av" style="background:${m.bg};width:36px;height:36px;font-size:12px;flex-shrink:0;">${m.ini}</div><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:var(--text);">${m.name}</div><div style="font-size:11px;color:var(--text3);">${m.wins}W / ${m.played-m.wins}L · ${pct}%</div></div><div style="font-size:13px;font-weight:700;color:var(--green);">${pct}%</div></div>`;
+  }).join('');
+}
+
+// CALENDAR
+function renderCal(){
+  const days=['M','T','W','T','F','S','S'];
+  const evtDays=new Set([21,22,24,25,26,29]);
+  let html=days.map(d=>`<div class="cal-day-hdr">${d}</div>`).join('');
+  for(let i=1;i<=2;i++)html+=`<div class="cal-day other-month">${29+i}</div>`;
+  for(let d=1;d<=30;d++){
+    const isToday=d===21;
+    const hasEvt=evtDays.has(d);
+    html+=`<div class="cal-day ${isToday?'today':''} ${hasEvt?'has-event':''}">${d}</div>`;
+  }
+  document.getElementById('cal-grid').innerHTML=html;
+}
+
+// ADMIN
+function showAddMember(){document.getElementById('add-member-modal').style.display='block';}
+function addMember(){document.getElementById('add-member-modal').style.display='none';alert('Member added successfully!');}
+
+document.getElementById('l-email').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('l-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.addEventListener('click',e=>{if(moreOpen&&!e.target.closest('#more-menu')&&!e.target.closest('#nb-more')){moreOpen=false;document.getElementById('more-menu').style.display='none';}});
+
+// init prof-av text node
+document.getElementById('prof-av').prepend(document.createTextNode('AL'));
+</script>
+</body>
+</html>
